@@ -144,88 +144,43 @@ ui <- shinyUI(
       class = 'p-2',
       tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
                 tags$style(HTML("
-                  .navbar .navbar-header {float: left; background-color:#f15a29;}
-                  .navbar .navbar-nav {float: right;background-color:#f15a29;}
-                  .container {min-width: 2250px; background-color:#f15a29;}
-                  .nav.navbar-nav .form-group.shiny-input-container {margin-bottom: 0; height: 0px;background-color:#f15a29;}
-                  .nav.navbar-nav .form-group.shiny-input-container > label {display: inline; background-color:#f15a29;}
-                  .p{
-                    font-family: Nutmeg-Regular;
-                    white-space: normal;
-                    color: #ffffff;
-                  }
-                  .dropdown-menu > .active > a {
-                   font-family: Nutmeg-Regular;
-                    background-color:#f15a29;
-                  }  
-                  .navbar-static-top {
-                    font-family: Nutmeg-Regular;
-                    background-color:#f15a29;
-                  }
-                  .navbar > .active {
-                    color: white;
-                    font-family: Nutmeg-Regular;
-                    background-color:#f15a29 !important;
-                  }
-                  .navbar-default .navbar-brand{
-                    color: white;
-                    font-family: Nutmeg-Regular;
-                    background-color:#f15a29;
-                  }
-                  .navbar-nav li a:hover, .navbar-nav > .active > a {
-                    color: white;
-                    font-family: Nutmeg-Regular;
-                    background-color:#f15a29 !important;
-                  }
-                  .p-2 {
-                    padding: 0px !important;
-                  }
-                  .small-box h3 {
-                    font-size: 38px;
-                    font-weight: 700;
-                    margin: 0 0 10px 0;
-                    white-space: normal !important;
-                    padding: 0;
-                  }
-                  @media (min-width: 768px) {
-                    .d-flex {
-                      display: flex;
-                    }
-                  }
-                  .small-box{
-                    border-radius: 2px;
-                    position: relative;
-                    display: block;
-                    margin-bottom: 20px;
-                    box-shadow: 0 1px 1px rgb(0 0 0 / 10%);
-                    height: calc(100% - 20px);
-                  }
-                  .mb-2{
-                    margin-bottom:20px;
-                  }
-                  .p-2{
-                    padding: 20px;
-                  }
-                  .small-box.bg-fuchsia {
-                    background-color: #2e3856 !important;
-                    color: white !important;
-                    font-family: Nutmeg-Light !important;
-                  }
-                  .small-box.bg-purple {
-                    background-color: #4A51B8 !important;
-                    color: white !important;
-                    font-family: Nutmeg-Light !important;
-                  }
-                  .small-box.bg-maroon {
-                    background-color: #4A70BA !important;
-                    color: white !important;
-                    font-family: Nutmeg-Light !important;
-                  }
-                  .small-box.bg-black {
-                    background-color: #b37812 !important;
-                    color: white !important;
-                    font-family: Nutmeg-Light !important;
-                  }
+                .navbar {
+              background-color: #f15a29 !important;
+              border: none;
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100%;
+              }
+              .navbar .navbar-nav {float: right;,
+               background-color: #f15a29 !important;}
+
+              .navbar {
+                background-color: #f15a29 !important;
+                border: none;
+              }
+              
+              .navbar-nav > li > a, .navbar-nav-right > li > a {
+                color: white !important;
+                font-size: 14px;
+                padding: 15px 20px;
+              }
+              
+              .navbar-nav > li > a:hover, .navbar-nav-right > li > a:hover {
+                background-color: #d9534f !important;
+                color: white !important;
+              }
+              
+              .navbar-nav > li.active > a, .navbar-nav-right > li.active > a {
+                background-color: #f15a29 !important;
+                color: white !important;
+              }
+              
+              .navbar-brand {
+                color: white !important;
+                font-weight: bold;
+                font-size: 24px;
+              }
+                
                 ")),
                 tags$footer(style = "
                   position:fixed;
@@ -831,5 +786,3 @@ server <- function(input, output, session) {
 }
 # Ejecutar la aplicación
 shinyApp(ui = ui, server = server)
-
-
