@@ -1,0 +1,146 @@
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('ABCWhyte-Light.woff') format("woff");}
+
+
+@font-face { 
+   font-family: Nutmeg-Light;
+   src: url('ABCWhyte-Medium.woff') format("woff");}
+
+
+
+   
+   /* Whole document: */
+body{
+  font-family: Nutmeg-Light;
+}
+
+p{
+  font-family: Nutmeg-Light!important;
+  white-space: normal !important;
+}
+
+h1,h2,h3,h4,h5,h6,p{
+  font-family: Nutmeg-Light;
+}
+
+
+.navbar.navbar-default .navbar-header .navbar-brand {
+  background: url('Logo AVGM.png') no-repeat;
+  background-size: contain;
+  display: block;
+  height: 50px; /* Altura de la imagen */
+  width: 400px; /* Ancho de la imagen */
+  padding: 0; /* Elimina el padding para asegurar que la imagen ocupa todo el espacio */
+}
+
+#nav ul {
+    margin: auto;
+     padding: 0;
+     overflow: hidden;
+     width: 60%;
+}
+
+/* active selected tab in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu{
+color: #ffffff;
+font-family: Nutmeg-Light;
+}
+
+/* other links in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu{
+font-family: Nutmeg-Light;
+}
+
+
+.skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+font-family: Nutmeg-Light;
+}
+
+
+.skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+font-family: Nutmeg-Light;
+}
+
+/* body */
+.content-wrapper, .right-side{
+font-family: Nutmeg-Light;}
+
+.shiny-input-container, h5{
+font-family: Nutmeg-Light;
+}
+
+.navbar1 .navbar{  
+font-family: Nutmeg-Light SemiBold;
+}
+
+.navbar1 .navbar-default .navbar-brand{
+font-family: Nutmeg-Light;
+}
+
+.navbar-default .navbar-nav > li > a {
+font-family: Nutmeg-Light;
+}
+
+.navbar1 .navbar-nav li a:hover, .navbar1 .navbar-nav > .active > a {
+font-family: Nutmeg-Light;
+}
+
+body {
+font-family: Nutmeg-Light;
+}
+
+.value-box .value {
+color: white;
+size: 12;
+font-family: Nutmeg-Light;
+}
+
+
+
+.skin-blue .main-header .logo {
+background-color: #6b6391;
+}
+
+/* logo when hovered */
+.skin-blue .main-header .logo:hover {
+background-color: #6b6391;
+}
+
+/* navbar (rest of the header) */
+.skin-blue .main-header .navbar {
+background-color: #f15a29;
+}
+
+/* main sidebar */
+.skin-blue .main-sidebar {
+background-color: #f15a29;
+}
+
+/* active selected tab in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+background-color: #f15a29;
+}
+
+/* other links in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu a{
+background-color: #f15a29;
+color: #ffffff;
+}
+
+/* other links in the sidebarmenu when hovered */
+.skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
+background-color: #f15a29;
+}
+/* toggle button when hovered  */
+.skin-blue .main-header .navbar .sidebar-toggle:hover{
+background-color: #f15a29;
+}
+
+/* body */
+.content-wrapper, .right-side {
+background-color: #ffffff;
+}
+
+
+        

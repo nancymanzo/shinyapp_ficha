@@ -1,0 +1,493 @@
+---
+title: "Ficha de Usuaria"
+output:
+  html_document:
+    df_print: paged
+params:
+  entidad_desc: "Entidad"
+---
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(janitor)
+library(readxl)
+library(treemap)
+library(cowplot)
+library(treemapify)
+library(stringr)
+library(waffle)
+library(forcats)
+
+usuarias <- read_excel("00_base_usuarias.xlsx") %>% janitor::clean_names()
+
+usuarias <- usuarias %>% filter(estado_desc == params$entidad_desc)
+
+paleta_ipas <- c("#f15a29", "#2e3856", "#631a86", "#28a845", "#80cacf", "#e82f85")
+
+```
+
+## Calidad de la atención al aborto inducido y postaborto desde la perspectiva de las usuarias en instituciones públicas de salud en **`r params$entidad_desc`**.
+
+------------------------------------------------------------------------
+
+##### **Edad**
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  group_by(grupo_de_edad) %>%
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  arrange(-Porcentaje) ->datos_edad
+
+edad_porcentaje <- datos_edad[1,3] %>% unlist() 
+edad_grupo <- datos_edad[1,1] %>% unlist() 
+
+promedio <- round(mean(usuarias$lac101, na.rm = TRUE), 0)
+
+```
+
+La edad promedio de las usuarias fue de **`r paste0(promedio)`** años, el **`r paste0(edad_porcentaje, "%")`** de ellas se encontraban en el grupo de edad de **`r paste0(edad_grupo)`**
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  group_by(grupo_de_edad) %>%
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  ggplot(aes(area = Porcentaje, fill = grupo_de_edad, 
+             label=str_wrap(paste0(grupo_de_edad, ": \n",
+                                   Porcentaje, "%"),25))) +
+  geom_treemap()+
+  geom_treemap_text(colour = "white",
+                    place = "centre",
+                    size = 15,
+                    grow = F)+
+  scale_fill_manual(values=paleta_ipas)+
+  theme_minimal()+
+  theme(legend.position = "none")->gg_edad
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+gg_edad
+```
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  group_by(lac103_desc) %>%
+  summarise(Total = n()) %>%
+  ungroup() %>%
+  mutate(lac103_desc = fct_relevel(
+    lac103_desc,"Soltera", "Casada/Union Libre", "Separada/Divorciada/Viuda"),  
+    Porcentaje = Total / sum(Total),
+    Porcentaje = round(Porcentaje * 100, 2),
+    Etiqueta = paste0(lac103_desc, " (", Porcentaje, "%)"))%>%
+  ggplot(aes(fill = Etiqueta, values = Total)) +
+  geom_waffle(n_rows = 6, size = 0.3, colour = "white", flip = TRUE) +  # Ajusta filas
+  facet_wrap(~factor(lac103_desc, c("Soltera", "Casada/Union Libre", "Separada/Divorciada/Viuda")))+
+  coord_equal() +  # Mantiene la relación de aspecto uniforme
+  scale_fill_manual(values=c("#f15a29", "#631a86", "#28a845", "#80cacf", "#e82f85"))+
+  labs(x="", y="", fill="", title = "")+
+  theme_minimal()->gg_edo_civil
+
+usuarias %>%
+  group_by(lac103_desc) %>%
+  summarise(Total = n()) %>% 
+  mutate(
+    Porcentaje = Total / sum(Total),
+    Porcentaje = round(Porcentaje * 100, 2)) %>% 
+  arrange(-Porcentaje)->datos_edo_civil
+
+
+```
+
+##### **Estado civil**
+
+La distribución por estado civil: **`r paste0(datos_edo_civil[1,1])`** (**`r paste0(datos_edo_civil[1,3], "%")`**), **`r paste0(datos_edo_civil[2,1])`** **`r paste0("(",datos_edo_civil[2,3], "%", ")")`** y **`r paste0(datos_edo_civil[3,1])`** (**`r paste0(datos_edo_civil[3,3], "%")`**).
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+gg_edo_civil
+```
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  group_by(lac102_desc) %>%
+  summarise(Total=n()) %>%
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  ggplot(aes(area = Porcentaje, fill = lac102_desc, 
+             label=str_wrap(paste0(lac102_desc, ": \n",Porcentaje, "%"),25))) +
+  geom_treemap()+
+  geom_treemap_text(colour = "white",
+                    place = "centre",
+                    size = 15,
+                    grow = F)+
+  scale_fill_manual(values=rev(paleta_ipas))+
+  theme(legend.position = "none")->gg_escolaridad
+
+usuarias %>%
+  group_by(lac102_desc) %>%
+  summarise(Total = n()) %>% 
+  mutate(
+    Porcentaje = Total / sum(Total),
+    Porcentaje = round(Porcentaje * 100, 2)) %>% 
+  arrange(-Porcentaje)->datos_escolaridad
+```
+
+##### **Escolaridad**
+
+Por nivel de escolaridad, de mayor a menor proporción: **`r paste0(datos_escolaridad[1,1])`** (**`r paste0(datos_escolaridad[1,3], "%")`**), **`r paste0(datos_escolaridad[2,1])`** **`r paste0("(",datos_escolaridad[2,3], "%", ")")`**, **`r paste0(datos_escolaridad[3,1])`** (**`r paste0(datos_edo_civil[3,3], "%")`**) y **`r paste0(datos_escolaridad[4,1])`** (**`r paste0(datos_escolaridad[4,3], "%")`**).
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+gg_escolaridad
+```
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  mutate(lac104_desc=case_when(
+    str_detect(lac104_desc, "aborto")~"Atencion post-aborto",
+    str_detect(lac104_desc, "legal/ILE")~"Aborto inducido/legal/ILE")) %>% 
+ group_by(lac104_desc) %>%
+  summarise(Total = n()) %>%
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2),
+         lac104_desc=str_wrap(lac104_desc,15)) %>% 
+  ungroup() %>%
+  ggplot(aes(x = "", y = Total, fill = lac104_desc)) +
+  geom_bar(stat = "identity", position = "fill")+
+   geom_text(aes(label =paste0(lac104_desc, "\n", Porcentaje, "%")),
+            position = position_fill(vjust = 0.5), size = 4, color = "white") +
+  scale_fill_manual(values=c("#2e3856","#f15a29"))+
+  labs(x="", y="", fill="", title = "")+
+  coord_flip()+
+  theme_minimal()+
+  theme(legend.position = "bottom")->gg_tipo_atencion
+
+usuarias %>%
+  mutate(lac104_desc=case_when(
+    str_detect(lac104_desc, "aborto")~"Atencion post-aborto",
+    str_detect(lac104_desc, "legal/ILE")~"Aborto inducido/legal/ILE")) %>% 
+ group_by(lac104_desc) %>%
+  summarise(Total = n()) %>%
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) ->datos_tipo_atencion
+
+datos_tipo_atencion[1,3]->pct_atencion_ile
+datos_tipo_atencion[2,3]->pct_atencion_aborto
+
+
+usuarias %>%
+  mutate(hf108_desc=case_when(
+    str_detect(hf108_desc, "AMEU")~"AMEU",
+    T~"Con medicamentos")) %>% 
+ group_by(hf108_desc) %>%
+  summarise(Total = n()) %>%
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2))->datos_prodecimientos
+
+datos_prodecimientos[1,1]->ameu
+datos_prodecimientos[1,3]->ameu_pct
+
+datos_prodecimientos[2,1]->medicamentos
+datos_prodecimientos[2,3]->medicamentos_pct
+```
+
+##### **Tipo de atención recibida**
+
+Del total de servicios brindados: **`r paste0(pct_atencion_ile, "%")`** fueron abortos inducidos **`r paste0(pct_atencion_aborto, "%")`** fueron atenciones postaborto. Por tipo de procedimiento recibido, el **`r paste0(medicamentos_pct, "%")`** se realizaron con medicamentos y el **`r paste0(ameu_pct, "%")`** por instrumental (AMEU).
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+ group_by(hf107_desc) %>%
+  summarise(Total = n()) %>%
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2),
+         hf107_desc=str_wrap(hf107_desc,15)) %>% 
+  ungroup() %>%
+  ggplot(aes(x = "", y = Porcentaje, fill = hf107_desc)) +
+  geom_bar(stat = "identity", position = "fill") +
+  geom_text(aes(label = paste0(hf107_desc, "\n", Porcentaje, "%")),
+            position = position_fill(vjust = 0.5), size = 4, color = "white") +
+  scale_fill_manual(values=c("#2e3856","#f15a29"))+
+  labs(x="", y="", fill="", title = "")+
+  coord_flip()+
+  theme_minimal()+
+  theme(legend.position = "bottom")->tipo_aborto
+
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+cowplot::plot_grid(gg_tipo_atencion, tipo_aborto)
+```
+
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  filter(!(grupo_gestacion=="No especificado")) %>% 
+  group_by(grupo_gestacion) %>%
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  arrange(-Porcentaje) ->datos_gestacion
+
+gestacion_tipo_1 <- datos_gestacion[1,3] %>% unlist() 
+gestacion_pct_1 <- datos_gestacion[1,1] %>% unlist() 
+
+gestacion_tipo_2 <- datos_gestacion[2,3] %>% unlist() 
+gestacion_pct_2 <- datos_gestacion[2,1] %>% unlist() 
+
+promedio_gestacion <- round(mean(usuarias$lac105, na.rm = TRUE), 0)
+
+usuarias %>%
+  filter(!(grupo_gestacion=="No especificado")) %>% 
+  group_by(grupo_gestacion) %>%
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2),
+         Etiqueta = paste0(grupo_gestacion, " (", Porcentaje, "%)")) %>%
+  ggplot(aes(fill = Etiqueta, values = Total)) +
+  geom_waffle(n_rows = 6, size = 0.3, colour = "white", flip = TRUE) +  # Ajusta filas
+  scale_fill_manual(values=paleta_ipas)+
+  facet_wrap(~factor(grupo_gestacion, c("Menos de 10 semanas", "11 semanas o más")))+
+  labs(x="", y="", fill="", title = "")+
+  coord_equal() +  # Mantiene la relación de aspecto uniforme
+  theme_minimal()->gg_grupo_gestacion
+  
+
+```
+##### **Tiempo gestacional**
+
+El tiempo gestacional promedio fue de **`r paste0(promedio_gestacion)`** semanas. El **`r paste0(gestacion_tipo_1, "%")`** presentó 10 semanas o menos.
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+gg_grupo_gestacion
+```
+
+##### **Anticoncepción**
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>% 
+  group_by(lac106_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(lac106_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_embarazarse
+
+usuarias %>% 
+  group_by(lac107_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(lac107_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_anticoncepcion
+```
+
+**`r paste0(pct_embarazarse, "%")`** de las usuarias reportó que el/la prestador/a de servicios le preguntó sobre su deseo de embarazarse otra vez.
+
+**`r paste0(pct_anticoncepcion, "%")`** de las usuarias reportó que el/la prestador/a de servicios le proporcionó información sobre anticoncepción.
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>%
+  group_by(hf125_desc) %>%
+  summarise(Total = n()) %>%
+  mutate(Porcentaje = Total / sum(Total) * 100,
+         Etiqueta = paste0(hf125_desc, " (", round(Porcentaje, 2), "%)")) %>% 
+  ggplot(aes(fill = Etiqueta, values = Total)) +
+  geom_waffle(n_rows = 14, size = 0.3, colour = "white", flip = TRUE) +  # Ajusta filas
+  scale_fill_manual(values=paleta_ipas)+
+  coord_equal() +  # Mantiene la relación de aspecto uniforme
+  labs(x="", y="", fill="", title = "")+
+  theme_minimal()+
+  theme(legend.position = "bottom") ->gg_anticonceptivo
+  
+  
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+gg_anticonceptivo
+```
+
+Si quería un método o cambió de opinión: ¿Recibió usted el método anticonceptivo que quería o recibió una referencia para conseguirlo?
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>% 
+  group_by(hf128_desc) %>% 
+  filter(!is.na(hf128_desc)) %>%
+  filter(hf125_desc=="Si, queria un metodo") %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  ggplot(aes(area = Porcentaje, fill = hf128_desc, label=str_wrap(paste0(hf128_desc, ": \n",Porcentaje, "%"),25))) +
+  geom_treemap()+
+  geom_treemap_text(colour = "white",
+                    place = "centre",
+                    size = 15,
+                    grow = F)+
+  scale_fill_manual(values=rev(paleta_ipas))+
+  theme_minimal()+
+  theme(legend.position = "none")->gg_recibio_anti
+
+```
+
+```{r echo=FALSE, fig.width=10, fig.height=5, message=FALSE, warning=FALSE}
+
+gg_recibio_anti
+
+```
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>% 
+  group_by(hf116_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf116_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_comoda
+
+usuarias %>% 
+  group_by(hf130_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf130_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_digno
+
+usuarias %>% 
+  group_by(hf132_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf132_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_necesidades
+
+# -----------------------------------------
+
+usuarias %>% 
+  filter(!is.na(hf110_desc)) %>% 
+  group_by(hf110_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf110_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_horario
+
+# -----------------------------------------
+
+usuarias %>% 
+  filter(!is.na(hf119_desc)) %>% 
+  group_by(hf119_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf119_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_explicaron
+
+usuarias %>% 
+  # filter(!is.na(hf120_desc)) %>% 
+  group_by(hf121b_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf121b_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_preguntas
+
+usuarias %>% 
+  # filter(!is.na(hf120_desc)) %>% 
+  group_by(hf120_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf120_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_tiempo_suficiente
+```
+------------------------------------------------------------------------
+
+##### **Interacción usuaria-proveedor/a**
+
+-   **`r paste0(pct_comoda, "%")`** se sintió cómoda compartiendo su información personal durante el proceso.
+-   **`r paste0(pct_digno, "%")`** reportó haber recibido un trato digno y respetuoso por parte del personal de salud.
+-   **`r paste0(pct_necesidades, "%")`** se sintió cómoda expresando sus necesidades, preguntas e inquietudes al personal de salud.
+
+##### **Acceso al servicio**
+
+-   **`r paste0(pct_horario, "%")`** conocían los horarios de atención.
+
+##### **Provisión de información**
+
+-   **`r paste0(pct_explicaron, "%")`** recibió explicación del proceso por parte del personal de salud en cada momento de la atención.
+-   **`r paste0(pct_preguntas, "%")`** tuvo la oportunidad de hacer preguntas sobre el procedimiento.
+-   **`r paste0(pct_tiempo_suficiente, "%")`**96% entendió la información que recibió por parte del personal de salud.
+
+```{r include=FALSE, message=FALSE, warning=FALSE}
+usuarias %>% 
+  group_by(hf129_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf129_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_presionada
+
+usuarias %>% 
+  group_by(hf133_desc) %>% 
+  summarise(Total = n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round(Porcentaje * 100, digits = 2)) %>% 
+  filter(hf133_desc %in% c("Muy solidario/a", "Un tanto solidario/a")) %>% 
+  summarise(Total = sum(Total),
+            Porcentaje = sum(Porcentaje)) %>% 
+  select(Porcentaje) %>%
+  unlist()->pct_solidaria
+
+# -----------------------------------------------------------------------------
+
+usuarias %>% 
+  group_by(hf114a_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf114a_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_medicamento
+
+usuarias %>% 
+  group_by(hf114b_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf114b_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_medicamento_pago
+
+usuarias %>% 
+  filter(!is.na(hf122_desc)) %>% 
+  group_by(hf122_desc) %>% 
+  summarise(Total=n()) %>% 
+  mutate(Porcentaje = Total / sum(Total),
+         Porcentaje = round((Porcentaje * 100), digits = 2)) %>% 
+  filter(hf122_desc=="Sí") %>% 
+  select(Porcentaje) %>% 
+  unlist()->pct_proc_seguro
+```
+
+##### **Toma de decisiones**
+
+-   **`r paste0(pct_presionada, "%")`** se sintió presionada por el personal de salud para aceptar un método anticonceptivo después del aborto.
+-   **`r paste0(pct_solidaria, "%")`** consideró al prestador/a de servicios como muy solidario/a con su decisión de tener un aborto.
+
+##### **Competencias técnicas**
+
+-   **`r paste0(pct_medicamento, "%")`** reportó que el personal de salud le ofreció medicamentos gratuitos para el dolor
+-   Al **`r paste0(pct_medicamento_pago, "%")`** le ofrecieron medicamentos para el dolor que podía pagar fácilmente.
+-   **`r paste0(pct_proc_seguro, "%")`** confió en que el procedimiento era seguro.
